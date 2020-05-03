@@ -19,28 +19,31 @@ def search_for_duplicates(path):
     image_hashes = {}
     dupes = {}
 
+    # scan through directories and subdirectories
     for r, d, f in os.walk(path):
-        for file in f:
-            if '.jpg' or '.png' or '.gif' in file:
-                filename = os.path.join(r, file)
-                img = cv2.imread(filename)
+        # go through all files
+        for filename in f:
+            if '.jpg' or '.png' or '.gif' in filename:
+                full_filename = os.path.join(r, filename)
+                img = cv2.imread(full_filename)
                 img_hash = bmh.compute(img)
 
                 is_dupe = False
+                # search through saved image hashes and see if there's a match
                 for f, h in image_hashes.items():
                     if (h == img_hash).all():
-                        dupes[filename.split('\\')[-1]] = f.split('\\')[-1]
+                        dupes[filename] = f
                         if is_verbose:
-                            print(f"{filename} is a duplicate of {f}")
+                            print(f"{full_filename} is a duplicate of {f}")
                             print(img_hash)
                         is_dupe = True
                         break
                 
                 if not is_dupe:
-                    image_hashes[filename] = img_hash
+                    image_hashes[full_filename] = img_hash
 
                     if is_verbose:
-                        print(f"Saving {filename} with hash: {img_hash}")
+                        print(f"Saving {full_filename} with hash: {img_hash}")
 
     if is_verbose:
         print(image_hashes)
